@@ -56,52 +56,82 @@ def load_data():
     except ValueError:
         # Try to get credentials from secrets
         try:
-            # Try Streamlit secrets first
-            firebase_creds = st.secrets["firebase"]
-            
-            if isinstance(firebase_creds, dict):
-                cred = credentials.Certificate(firebase_creds)
-            else:
-                st.error("Invalid Firebase credentials format")
-                return pd.DataFrame()
-        except:
-            # Try local config
-            import yaml
-            with open('config.yaml', 'r') as f:
-                config = yaml.safe_load(f)
-            
-            firebase_config = config.get('firebase_config', {})
-            service_account_path = firebase_config.get('service_account_path')
-            
-            if service_account_path:
+            import os
+            # Check if running on Streamlit Cloud
+            if hasattr(st, 'secrets'):
                 try:
-                    cred = credentials.Certificate(service_account_path)
+                    firebase_creds = st.secrets["firebase"]
+                    if isinstance(firebase_creds, dict):
+                        cred = credentials.Certificate(firebase_creds)
+                    elif isinstance(firebase_creds, str):
+                        import json
+                        cred_dict = json.loads(firebase_creds)
+                        cred = credentials.Certificate(cred_dict)
+                    else:
+                        st.error("Invalid Firebase credentials format")
+                        return pd.DataFrame()
                 except Exception as e:
-                    st.error(f"Cannot load service account: {e}")
+                    st.error(f"Error loading secrets: {e}")
                     return pd.DataFrame()
             else:
-                st.error("No Firebase credentials found")
+                raise Exception("No secrets available")
+        except:
+            # Try local config
+            try:
+                import yaml
+                with open('config.yaml', 'r') as f:
+                    config = yaml.safe_load(f)
+                
+                firebase_config = config.get('firebase_config', {})
+                service_account_path = firebase_config.get('service_account_path')
+                
+                if service_account_path:
+                    try:
+                        cred = credentials.Certificate(service_account_path)
+                    except Exception as e:
+                        st.error(f"Cannot load service account: {e}")
+                        return pd.DataFrame()
+                else:
+                    st.error("No Firebase credentials found")
+                    return pd.DataFrame()
+            except Exception as e:
+                st.error(f"Error loading config: {e}")
                 return pd.DataFrame()
         
-        firebase_admin.initialize_app(cred)
+        try:
+            firebase_admin.initialize_app(cred)
+        except Exception as e:
+            st.error(f"Error initializing Firebase: {e}")
+            return pd.DataFrame()
     
-    db = firestore.client()
-    
-    # Get all trades
-    trades_ref = db.collection('trades')
-    docs = trades_ref.stream()
-    
-    data = []
-    for doc in docs:
-        doc_data = doc.to_dict()
-        doc_data['id'] = doc.id
-        data.append(doc_data)
-    
-    if data:
-        df = pd.DataFrame(data)
+    try:
+        db = firestore.client()
         
-        # Parse dates
-        date_fields = ['open_time', 'close_time', 'created_at', 'updated_at']
+        # Get all trades
+        trades_ref = db.collection('trades')
+        docs = trades_ref.stream()
+        
+        data = []
+        for doc in docs:
+            doc_data = doc.to_dict()
+            doc_data['id'] = doc.id
+            data.append(doc_data)
+        
+        if data:
+            df = pd.DataFrame(data)
+            
+            # Parse dates
+            date_fields = ['open_time', 'close_time', 'created_at', 'updated_at']
+            for field in date_fields:
+                if field in df.columns:
+                    df[field] = pd.to_datetime(df[field], errors='coerce')
+            
+            return df
+        
+        return pd.DataFrame()
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        return pd.DataFrame()
         for field in date_fields:
             if field in df.columns:
                 df[field] = pd.to_datetime(df[field], errors='coerce')
