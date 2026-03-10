@@ -1,0 +1,16 @@
+# Supabase
+supabase_url: "YOUR_SUPABASE_URL"
+supabase_key: "YOUR_SUPABASE_ANON_KEY"
+
+# Telegram
+telegram_bot_token: "YOUR_TELEGRAM_BOT_TOKEN"
+telegram_chat_id: "YOUR_TELEGRAM_CHAT_ID"
+
+# MT5
+mt5_login: 12345678
+mt5_password: "YOUR_MT5_PASSWORD"
+mt5_server: "YOUR_MT5_SERVER"
+
+# Settings
+check_interval: 5
+symbols: ["XAUUSD", "EURUSD", "GBPUSD"]

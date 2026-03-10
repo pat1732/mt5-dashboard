@@ -1,0 +1,8 @@
+MetaTrader5==5.0.5640
+firebase-admin==6.5.0
+google-cloud-firestore==2.19.0
+pyyaml==6.0.2
+streamlit==1.40.0
+plotly==5.24.1
+pandas==2.2.3
+requests==2.32.3
