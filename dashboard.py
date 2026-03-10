@@ -1,11 +1,12 @@
 """
-MT5 Trade Dashboard - แสดงข้อมูล Trade จาก Firebase Firestore
+MT5 Trade Dashboard - แสดงข้อมูล Trade จาก Firebase Firestore (REST API)
 """
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
+import requests
 
 # Page Config
 st.set_page_config(
@@ -42,103 +43,53 @@ st.markdown("""
 
 @st.cache_data
 def load_data():
-    """โหลดข้อมูลจาก Firebase Firestore"""
+    """โหลดข้อมูลจาก Firebase Firestore via REST API"""
     try:
-        import firebase_admin
-        from firebase_admin import credentials, firestore
-    except ImportError:
-        st.error("Please install firebase-admin: pip install firebase-admin")
-        return pd.DataFrame()
-    
-    # Initialize Firebase if not already
-    try:
-        firebase_admin.get_app()
-    except ValueError:
-        # Try to get credentials from secrets
-        try:
-            import os
-            # Check if running on Streamlit Cloud
-            if hasattr(st, 'secrets'):
-                try:
-                    firebase_creds = st.secrets["firebase"]
-                    if isinstance(firebase_creds, dict):
-                        cred = credentials.Certificate(firebase_creds)
-                    elif isinstance(firebase_creds, str):
-                        import json
-                        cred_dict = json.loads(firebase_creds)
-                        cred = credentials.Certificate(cred_dict)
-                    else:
-                        st.error("Invalid Firebase credentials format")
-                        return pd.DataFrame()
-                except Exception as e:
-                    st.error(f"Error loading secrets: {e}")
-                    return pd.DataFrame()
-            else:
-                raise Exception("No secrets available")
-        except:
-            # Try local config
-            try:
-                import yaml
-                with open('config.yaml', 'r') as f:
-                    config = yaml.safe_load(f)
-                
-                firebase_config = config.get('firebase_config', {})
-                service_account_path = firebase_config.get('service_account_path')
-                
-                if service_account_path:
-                    try:
-                        cred = credentials.Certificate(service_account_path)
-                    except Exception as e:
-                        st.error(f"Cannot load service account: {e}")
-                        return pd.DataFrame()
-                else:
-                    st.error("No Firebase credentials found")
-                    return pd.DataFrame()
-            except Exception as e:
-                st.error(f"Error loading config: {e}")
-                return pd.DataFrame()
+        # ใช้ Firestore REST API
+        project_id = "mt5-trading-a1e86"
+        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/(default)/documents/trades"
         
-        try:
-            firebase_admin.initialize_app(cred)
-        except Exception as e:
-            st.error(f"Error initializing Firebase: {e}")
+        response = requests.get(url, timeout=10)
+        
+        if response.status_code != 200:
+            st.error(f"Error: {response.status_code}")
             return pd.DataFrame()
-    
-    try:
-        db = firestore.client()
         
-        # Get all trades
-        trades_ref = db.collection('trades')
-        docs = trades_ref.stream()
+        data = response.json()
         
-        data = []
-        for doc in docs:
-            doc_data = doc.to_dict()
-            doc_data['id'] = doc.id
-            data.append(doc_data)
+        if not data.get('documents'):
+            return pd.DataFrame()
         
-        if data:
-            df = pd.DataFrame(data)
+        trades = []
+        for doc in data['documents']:
+            fields = doc.get('fields', {})
+            trade = {
+                'symbol': fields.get('symbol', {}).get('stringValue', '-'),
+                'type': fields.get('type', {}).get('stringValue', '-'),
+                'volume': fields.get('volume', {}).get('doubleValue', 0),
+                'open_price': fields.get('open_price', {}).get('doubleValue', 0),
+                'close_price': fields.get('close_price', {}).get('doubleValue', 0),
+                'profit': fields.get('profit', {}).get('doubleValue', 0),
+                'open_time': fields.get('open_time', {}).get('stringValue', '-'),
+                'close_time': fields.get('close_time', {}).get('stringValue', '-'),
+            }
+            trades.append(trade)
+        
+        if trades:
+            df = pd.DataFrame(trades)
             
             # Parse dates
-            date_fields = ['open_time', 'close_time', 'created_at', 'updated_at']
-            for field in date_fields:
+            for field in ['open_time', 'close_time']:
                 if field in df.columns:
                     df[field] = pd.to_datetime(df[field], errors='coerce')
             
             return df
         
         return pd.DataFrame()
-    except Exception as e:
-        st.error(f"Error loading data: {e}")
-        return pd.DataFrame()
-        for field in date_fields:
-            if field in df.columns:
-                df[field] = pd.to_datetime(df[field], errors='coerce')
         
-        return df
-    
-    return pd.DataFrame()
+    except Exception as e:
+        st.error(f"Error loading data: {str(e)}")
+        return pd.DataFrame()
 
 def calculate_metrics(df):
     """คำนวณ Metrics"""
@@ -183,7 +134,6 @@ def plot_equity_curve(df):
     if closed_trades.empty:
         return None
     
-    # คำนวณ cumulative profit
     closed_trades = closed_trades.copy()
     closed_trades = closed_trades.sort_values('close_time')
     closed_trades['cumulative_profit'] = closed_trades['profit'].cumsum()
@@ -260,11 +210,8 @@ st.title("📈 MT5 Trade Dashboard")
 df = load_data()
 
 if df.empty:
-    st.warning("⚠️ No trade data found. Please run mt5_listener.py first!")
-    st.info("Make sure you have:")
-    st.info("1. Set up Firebase credentials in config.yaml")
-    st.info("2. Run: pip install firebase-admin")
-    st.info("3. Run: python mt5_listener.py")
+    st.warning("⚠️ ไม่มีข้อมูลการเทรด!")
+    st.info("EA จะเก็บข้อมูลเมื่อมีการเทรดค่ะ")
     st.stop()
 
 # Calculate Metrics
