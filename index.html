@@ -250,8 +250,15 @@
                     // แปลง timestamp เป็นวันที่
                     function formatTime(timeValue) {
                         if (!timeValue) return '-';
-                        // ถ้าเป็น string (เช่น "2026-03-11 13:00:00")
-                        if (typeof timeValue === 'string') return timeValue;
+                        // ถ้าเป็น string (เช่น "2026-03-11 13:00:00" หรือ "1773208982")
+                        if (typeof timeValue === 'string') {
+                            // ถ้าเป็นตัวเลข string ให้แปลงเป็น number
+                            if (!isNaN(timeValue)) {
+                                const date = new Date(parseInt(timeValue) * 1000);
+                                return date.toLocaleString('th-TH');
+                            }
+                            return timeValue;
+                        }
                         // ถ้าเป็นตัวเลข (Unix timestamp)
                         if (typeof timeValue === 'number') {
                             const date = new Date(timeValue * 1000);
