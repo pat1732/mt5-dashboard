@@ -240,8 +240,8 @@
         // โหลด Bot Status
         async function loadBotStatus() {
             try {
-                const statusUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/bot_status/status`;
-                const statusResp = await fetch(statusUrl);
+                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(`https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/bot_status/status`);
+                const statusResp = await fetch(proxyUrl);
                 
                 if (statusResp.ok) {
                     const statusData = await statusResp.json();
@@ -266,9 +266,9 @@
                 // โหลด Bot Status ก่อน
                 await loadBotStatus();
                 
-                const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/trades`;
-                
-                const response = await fetch(url, {cache: 'no-store'});
+                // Use CORS proxy
+                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(`https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/trades`);
+                const response = await fetch(proxyUrl);
                 
                 if (!response.ok) {
                     throw new Error('ไม่สามารถดึงข้อมูลได้ กรุณาตั้งค่า Firestore เป็น Public');
