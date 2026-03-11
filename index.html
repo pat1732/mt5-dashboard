@@ -299,8 +299,25 @@
                 
                 // เพิ่มลำดับที่
                 trades.forEach((trade, index) => {
-                    // ดึงวันจาก openTime
-                    const dayMatch = trade.openTime.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+                    // ดึงวันจาก closeTime
+                    const dayMatch = trade.closeTime ? trade.closeTime.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/) : null;
+                    let dayStr = '00';
+                    if (dayMatch) {
+                        dayStr = dayMatch[1].padStart(2, '0');
+                    }
+                    trade.orderNo = dayStr + '-' + (index + 1).toString().padStart(4, '0');
+                });
+                
+                // เรียงลำดับตามเวลา
+                trades.sort((a, b) => {
+                    const timeA = a.closeTime || '';
+                    const timeB = b.closeTime || '';
+                    return timeA.localeCompare(timeB);
+                });
+                
+                // คำนวณลำดับใหม่หลังเรียง
+                trades.forEach((trade, index) => {
+                    const dayMatch = trade.closeTime ? trade.closeTime.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/) : null;
                     let dayStr = '00';
                     if (dayMatch) {
                         dayStr = dayMatch[1].padStart(2, '0');
