@@ -179,7 +179,7 @@
                 <div class="metric-label">Total Trades</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value" id="totalProfit">$0.00</div>
+                <div class="metric-value" id="totalProfit">ﬂ0.00</div>
                 <div class="metric-label">Total Profit</div>
             </div>
             <div class="metric-card">
@@ -187,7 +187,7 @@
                 <div class="metric-label">Win Rate</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value" id="avgProfit">$0.00</div>
+                <div class="metric-value" id="avgProfit">ﬂ0.00</div>
                 <div class="metric-label">Avg Profit/Trade</div>
             </div>
         </div>
@@ -219,7 +219,7 @@
         
         async function loadData() {
             try {
-                const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/trades`;
+                const url = `https://firestore.googleapis.com/v1/projects/ﬂ{PROJECT_ID}/databases/(default)/documents/trades`;
                 
                 const response = await fetch(url);
                 
@@ -256,22 +256,22 @@
                 const avgProfit = totalTrades > 0 ? totalProfit / totalTrades : 0;
                 
                 document.getElementById('totalTrades').textContent = totalTrades;
-                document.getElementById('totalProfit').textContent = '$' + totalProfit.toFixed(2);
+                document.getElementById('totalProfit').textContent = 'ﬂ' + totalProfit.toFixed(2);
                 document.getElementById('totalProfit').className = 'metric-value ' + (totalProfit >= 0 ? 'profit' : 'loss');
                 document.getElementById('winRate').textContent = winRate + '%';
-                document.getElementById('avgProfit').textContent = '$' + avgProfit.toFixed(2);
+                document.getElementById('avgProfit').textContent = 'ﬂ' + avgProfit.toFixed(2);
                 
                 const tableBody = document.getElementById('tradeTable');
                 tableBody.innerHTML = trades.map(trade => `
                     <tr>
-                        <td>${trade.symbol}</td>
-                        <td class="${trade.type === 'BUY' ? 'buy' : 'sell'}">${trade.type}</td>
-                        <td>${trade.volume.toFixed(2)}</td>
-                        <td>${trade.openPrice.toFixed(5)}</td>
-                        <td>${trade.closePrice ? trade.closePrice.toFixed(5) : '-'}</td>
-                        <td class="${trade.profit >= 0 ? 'profit' : 'loss'}">$${trade.profit.toFixed(2)}</td>
-                        <td>${trade.openTime}</td>
-                        <td>${trade.closeTime || '-'}</td>
+                        <td>ﬂ{trade.symbol}</td>
+                        <td class="ﬂ{trade.type === 'BUY' ? 'buy' : 'sell'}">ﬂ{trade.type}</td>
+                        <td>ﬂ{trade.volume.toFixed(2)}</td>
+                        <td>ﬂ{trade.openPrice.toFixed(5)}</td>
+                        <td>ﬂ{trade.closePrice ? trade.closePrice.toFixed(5) : '-'}</td>
+                        <td class="ﬂ{trade.profit >= 0 ? 'profit' : 'loss'}">ﬂﬂ{trade.profit.toFixed(2)}</td>
+                        <td>ﬂ{trade.openTime}</td>
+                        <td>ﬂ{trade.closeTime || '-'}</td>
                     </tr>
                 `).join('');
                 
@@ -287,9 +287,9 @@
         
         function showEmptyData() {
             document.getElementById('totalTrades').textContent = '0';
-            document.getElementById('totalProfit').textContent = '$0.00';
+            document.getElementById('totalProfit').textContent = 'ﬂ0.00';
             document.getElementById('winRate').textContent = '0%';
-            document.getElementById('avgProfit').textContent = '$0.00';
+            document.getElementById('avgProfit').textContent = 'ﬂ0.00';
             document.getElementById('tradeTable').innerHTML = '<tr><td colspan="8" class="loading">‡πÑ‡∏°‡πà‡∏°‡∏µ‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏Å‡∏≤‡∏£‡πÄ‡∏ó‡∏£‡∏î</td></tr>';
         }
         
