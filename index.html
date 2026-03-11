@@ -82,21 +82,24 @@
     <script>
         const PROJECT_ID = "mt5-trading-a1e86";
         
+        // แก้ไข: รองรับทั้ง string และ number (Unix timestamp)
         function formatTime(ts) {
             if (!ts || ts === '-') return '-';
-            if (typeof ts === 'string' && /^\d+$/.test(ts)) {
-                const date = new Date(parseInt(ts) * 1000);
+            // แปลงเป็น number ถ้าเป็น string
+            const tsNum = typeof ts === 'string' ? parseInt(ts) : ts;
+            if (!isNaN(tsNum)) {
+                const date = new Date(tsNum * 1000);
                 return date.toLocaleString('th-TH', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
             }
             return ts;
         }
         
+        // แก้ไข: ใช้ corsproxy.io แทน allorigins (เร็วกว่า)
         async function fetchWithCORS(url) {
             try {
-                const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(url);
+                const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(url);
                 const response = await fetch(proxyUrl);
-                const data = await response.json();
-                return JSON.parse(data.contents);
+                return await response.json();
             } catch(e) {
                 console.error('Proxy error:', e);
                 return null;
@@ -129,6 +132,7 @@
                     else if (tradeType === 'SELL' && profit < 0) action = 'BUY (Close)';
                     else if (tradeType === 'SELL' && profit > 0) action = 'SELL (Close)';
                     
+                    // แก้ไข: รองรับ integerValue สำหรับ open_time และ close_time
                     return {
                         orderNo: (idx + 1).toString().padStart(4, '0'),
                         symbol: f.symbol?.stringValue || '-',
@@ -138,20 +142,20 @@
                         openPrice: f.open_price?.integerValue || f.open_price?.doubleValue || 0,
                         closePrice: f.close_price?.doubleValue || 0,
                         profit: profit,
-                        openTime: f.open_time?.stringValue || '-',
-                        closeTime: f.close_time?.stringValue || '-',
+                        openTime: f.open_time?.integerValue || f.open_time?.stringValue || '-',
+                        closeTime: f.close_time?.integerValue || f.close_time?.stringValue || '-',
                         status: status
                     };
                 });
                 
-                // Sort by time
+                // แก้ไข: sort โดยใช้ number แทน string
                 trades.sort((a, b) => {
-                    const timeA = a.closeTime || a.openTime || '';
-                    const timeB = b.closeTime || b.openTime || '';
-                    return timeA.localeCompare(timeB);
+                    const timeA = parseInt(a.closeTime) || parseInt(a.openTime) || 0;
+                    const timeB = parseInt(b.closeTime) || parseInt(b.openTime) || 0;
+                    return timeA - timeB;
                 });
                 
-                // Reassign order numbers after sort
+                // Reassign order numbers after sort (0001, 0002, ...)
                 trades.forEach((t, idx) => t.orderNo = (idx + 1).toString().padStart(4, '0'));
                 
                 // Calculate stats (only closed trades with profit != 0)
