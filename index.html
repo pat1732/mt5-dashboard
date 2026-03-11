@@ -268,7 +268,7 @@
                 
                 const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/trades`;
                 
-                const response = await fetch(url);
+                const response = await fetch(url, {cache: 'no-store'});
                 
                 if (!response.ok) {
                     throw new Error('ไม่สามารถดึงข้อมูลได้ กรุณาตั้งค่า Firestore เป็น Public');
