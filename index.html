@@ -370,8 +370,14 @@
                     trade.orderNo = dayStr + '-' + (index + 1).toString().padStart(4, '0');
                 });
                 
+                // แสดงทั้ง open และ closed
+                const allTrades = trades;
                 const closedTrades = trades.filter(t => t.profit !== 0);
                 const winning = closedTrades.filter(t => t.profit > 0);
+                
+                // รวม open + closed
+                const totalProfit = trades.reduce((sum, t) => sum + (t.profit || 0), 0);
+                const totalTrades = trades.length;
                 const totalTrades = closedTrades.length;
                 const totalProfit = closedTrades.reduce((sum, t) => sum + t.profit, 0);
                 const winRate = totalTrades > 0 ? (winning.length / totalTrades * 100).toFixed(1) : 0;
