@@ -276,15 +276,17 @@
                 
                 const data = await response.json();
                 
+                console.log('Data received:', data);
+                
                 if (!data.documents || data.documents.length === 0) {
-                    showEmptyData();
+                    document.getElementById('tradeTable').innerHTML = '<tr><td colspan="9">ไม่มีข้อมูล</td></tr>';
                     return;
                 }
                 
                 const trades = data.documents.map(doc => {
-                    const fields = doc.fields;
-                    const tradeType = fields.type?.stringValue || '-';
-                    const profit = fields.profit?.doubleValue || 0;
+                    const fields = doc.fields || {};
+                    const tradeType = (fields.type && fields.type.stringValue) ? fields.type.stringValue : '-';
+                    const profit = (fields.profit && fields.profit.doubleValue) ? parseFloat(fields.profit.doubleValue) : 0;
                     
                     // คำนวณ action ที่ถูกต้อง
                     let action = tradeType;
