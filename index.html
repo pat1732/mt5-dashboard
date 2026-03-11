@@ -94,10 +94,10 @@
             return ts;
         }
         
-        // แก้ไข: ใช้ corsproxy.io แทน allorigins (เร็วกว่า)
+        // ใช้ allorigins raw (ฟรีไม่ต้อง API key)
         async function fetchWithCORS(url) {
             try {
-                const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(url);
+                const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
                 const response = await fetch(proxyUrl);
                 return await response.json();
             } catch(e) {
