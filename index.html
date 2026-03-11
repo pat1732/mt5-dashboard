@@ -5,173 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MT5 Trade Dashboard</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            min-height: 100vh;
-            color: #fff;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(90deg, #00d4ff, #00ff88);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .last-update {
-            color: #888;
-            font-size: 0.9rem;
-            margin-top: 10px;
-        }
-        
-        .metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .metric-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .metric-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
-        }
-        
-        .metric-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .metric-label {
-            color: #888;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; color: #fff; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { font-size: 2.5rem; background: linear-gradient(90deg, #00d4ff, #00ff88); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; margin-bottom: 20px; }
+        .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .metric-card { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px; text-align: center; }
+        .metric-value { font-size: 2rem; font-weight: bold; }
+        .metric-label { color: #888; margin-top: 5px; }
         .profit { color: #00ff88; }
         .loss { color: #ff4757; }
-        .neutral { color: #ffd93d; }
-        
-        .chart-section {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .chart-section h2 {
-            margin-bottom: 20px;
-            color: #00d4ff;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        th {
-            background: rgba(255, 255, 255, 0.05);
-            color: #00d4ff;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-        }
-        
-        tr:hover { background: rgba(255, 255, 255, 0.05); }
+        table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.05); border-radius: 15px; overflow: hidden; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        th { background: rgba(0,212,255,0.2); }
         .buy { color: #00ff88; }
         .sell { color: #ff4757; }
-        
-        .refresh-btn {
-            background: linear-gradient(90deg, #00d4ff, #00ff88);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            color: #1a1a2e;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: transform 0.3s;
-        }
-        
-        .refresh-btn:hover { transform: scale(1.05); }
-        
-        .status-dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #00ff88;
-            margin-right: 8px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .loading { text-align: center; padding: 50px; color: #888; }
-        
-        .error {
-            background: rgba(255, 71, 87, 0.2);
-            border: 1px solid #ff4757;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            color: #ff4757;
-        }
+        .loading { text-align: center; color: #888; padding: 30px; }
+        .last-update { text-align: center; color: #666; font-size: 0.8rem; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>📈 MT5 Trade Dashboard</h1>
-            <div class="last-update">
-                <span class="status-dot"></span>
-                <span id="lastUpdate">กำลังโหลดข้อมูล...</span>
-            </div>
-            <br>
-            <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
-        </header>
-        
-        <div id="error" class="error" style="display: none;"></div>
+        <h1>📊 MT5 Trade Dashboard</h1>
         
         <div class="metrics">
             <div class="metric-card">
@@ -179,258 +34,105 @@
                 <div class="metric-label">Total Trades</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value" id="totalProfit">�0.00</div>
+                <div class="metric-value" id="totalProfit">฿0</div>
                 <div class="metric-label">Total Profit</div>
             </div>
             <div class="metric-card">
                 <div class="metric-value" id="winRate">0%</div>
                 <div class="metric-label">Win Rate</div>
             </div>
-            <div class="metric-card">
-                <div class="metric-value" id="avgProfit">�0.00</div>
-                <div class="metric-label">Avg Profit/Trade</div>
-            </div>
         </div>
-        
-        <div class="chart-section">
-            <h2>🤖 Bot Status</h2>
-            <div id="botStatus">
-                <div class="metric-card" style="margin: 10px;">
-                    <div class="metric-value" id="eaStatus">⏳ Loading...</div>
-                    <div class="metric-label">EA Status</div>
-                </div>
-                <div class="metric-card" style="margin: 10px;">
-                    <div class="metric-value" id="openPositions">0</div>
-                    <div class="metric-label">Open Positions</div>
-                </div>
-                <div class="metric-card" style="margin: 10px;">
-                    <div class="metric-value" id="floatingPL">฿0</div>
-                    <div class="metric-label">Floating P/L</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="chart-section">
-            <h2>📊 Trade History</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Order No</th>
-                        <th>Symbol</th>
-                        <th>Type</th>
-                        <th>Action</th>
-                        <th>Volume</th>
-                        <th>Open Price</th>
-                        <th>Close Price</th>
-                        <th>Profit</th>
-                        <th>Open Time</th>
-                        <th>Close Time</th>
-                    </tr>
-                </thead>
-                <tbody id="tradeTable">
-                    <tr><td colspan="9" class="loading">กำลังโหลดข้อมูล...</td></tr>
-                </tbody>
-            </table>
-        </div>
+
+        <h2>📊 Trade History</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Symbol</th>
+                    <th>Type</th>
+                    <th>Volume</th>
+                    <th>Price</th>
+                    <th>Profit</th>
+                </tr>
+            </thead>
+            <tbody id="tradeTable">
+                <tr><td colspan="6" class="loading">Loading...</td></tr>
+            </tbody>
+        </table>
+        <div class="last-update" id="lastUpdate"></div>
     </div>
-    
+
     <script>
         const PROJECT_ID = "mt5-trading-a1e86";
         
-        // โหลด Bot Status
-        async function loadBotStatus() {
-            try {
-                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(`https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/bot_status/status`);
-                const statusResp = await fetch(proxyUrl);
-                
-                if (statusResp.ok) {
-                    const statusData = await statusResp.json();
-                    if (statusData.fields) {
-                        const eaRunning = statusData.fields.ea_running?.stringValue || 'Unknown';
-                        const openPos = statusData.fields.open_positions?.integerValue || 0;
-                        const floatingPL = statusData.fields.floating_pl?.doubleValue || 0;
-                        
-                        document.getElementById('eaStatus').textContent = eaRunning === 'true' ? '✅ ทำงาน' : '❌ หยุด';
-                        document.getElementById('openPositions').textContent = openPos;
-                        document.getElementById('floatingPL').textContent = '฿' + floatingPL.toFixed(2);
-                        document.getElementById('floatingPL').className = 'metric-value ' + (floatingPL >= 0 ? 'profit' : 'loss');
-                    }
-                }
-            } catch (e) {
-                document.getElementById('eaStatus').textContent = '⚠️ เช็คเอง';
-            }
+        // ใช้ allorigins ข้าม CORS
+        async function fetchWithCORS(url) {
+            const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(url);
+            const response = await fetch(proxyUrl);
+            const data = await response.json();
+            return JSON.parse(data.contents);
         }
         
         async function loadData() {
             try {
-                // โหลด Bot Status ก่อน
-                await loadBotStatus();
-                
-                // Use CORS proxy
-                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(`https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/trades`);
-                const response = await fetch(proxyUrl);
-                
-                if (!response.ok) {
-                    throw new Error('ไม่สามารถดึงข้อมูลได้ กรุณาตั้งค่า Firestore เป็น Public');
-                }
-                
-                const data = await response.json();
-                
-                console.log('Data received:', data);
+                const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/trades`;
+                const data = await fetchWithCORS(url);
                 
                 if (!data.documents || data.documents.length === 0) {
-                    document.getElementById('tradeTable').innerHTML = '<tr><td colspan="9">ไม่มีข้อมูล</td></tr>';
+                    document.getElementById('tradeTable').innerHTML = '<tr><td colspan="6">No data</td></tr>';
                     return;
                 }
                 
+                // Process data
                 const trades = data.documents.map(doc => {
-                    const fields = doc.fields || {};
-                    const tradeType = (fields.type && fields.type.stringValue) ? fields.type.stringValue : '-';
-                    const profit = (fields.profit && fields.profit.doubleValue) ? parseFloat(fields.profit.doubleValue) : 0;
-                    
-                    // คำนวณ action ที่ถูกต้อง
-                    let action = tradeType;
-                    if (tradeType === 'BUY' && profit < 0) action = 'SELL (Close)';
-                    else if (tradeType === 'BUY' && profit > 0) action = 'BUY (Close)';
-                    else if (tradeType === 'SELL' && profit < 0) action = 'BUY (Close)';
-                    else if (tradeType === 'SELL' && profit > 0) action = 'SELL (Close)';
-                    
-                    // แปลง timestamp เป็นวันที่
-                    function formatTime(timeValue) {
-                        if (!timeValue) return '-';
-                        // ถ้าเป็น string (เช่น "2026-03-11 13:00:00" หรือ "1773208982")
-                        if (typeof timeValue === 'string') {
-                            // ถ้าเป็นตัวเลข string ให้แปลงเป็น number
-                            if (!isNaN(timeValue)) {
-                                const date = new Date(parseInt(timeValue) * 1000);
-                                return date.toLocaleString('th-TH');
-                            }
-                            return timeValue;
-                        }
-                        // ถ้าเป็นตัวเลข (Unix timestamp)
-                        if (typeof timeValue === 'number') {
-                            const date = new Date(timeValue * 1000);
-                            return date.toLocaleString('th-TH');
-                        }
-                        return '-';
-                    }
-                    
-                    // สร้างหมายเลขออร์เดอร์แบบ วันที่-ลำดับ
-                    function generateOrderNumber(timeValue) {
-                        if (!timeValue) return '-';
-                        let timestamp;
-                        if (typeof timeValue === 'string' && !isNaN(timeValue)) {
-                            timestamp = parseInt(timeValue) * 1000;
-                        } else if (typeof timeValue === 'number') {
-                            timestamp = timeValue * 1000;
-                        } else {
-                            return '-';
-                        }
-                        const date = new Date(timestamp);
-                        const day = String(date.getDate()).padStart(2, '0');
-                        return day;
-                    }
-                    
+                    const f = doc.fields || {};
                     return {
-                        symbol: fields.symbol?.stringValue || '-',
-                        type: tradeType,
-                        action: action,
-                        volume: fields.volume?.doubleValue || 0,
-                        openPrice: fields.open_price?.doubleValue || 0,
-                        closePrice: fields.close_price?.doubleValue || 0,
-                        profit: profit,
-                        openTime: formatTime(fields.open_time?.stringValue || fields.open_time?.integerValue),
-                        closeTime: formatTime(fields.close_time?.stringValue || fields.close_time?.integerValue)
+                        symbol: f.symbol?.stringValue || '-',
+                        type: f.type?.stringValue || '-',
+                        volume: f.volume?.doubleValue || 0,
+                        price: f.open_price?.integerValue || f.close_price?.doubleValue || 0,
+                        profit: f.profit?.doubleValue || 0,
+                        time: f.open_time?.stringValue || '-'
                     };
                 });
                 
-                // เพิ่มลำดับที่
-                trades.forEach((trade, index) => {
-                    // ดึงวันจาก closeTime
-                    const dayMatch = trade.closeTime ? trade.closeTime.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/) : null;
-                    let dayStr = '00';
-                    if (dayMatch) {
-                        dayStr = dayMatch[1].padStart(2, '0');
-                    }
-                    trade.orderNo = dayStr + '-' + (index + 1).toString().padStart(4, '0');
-                });
+                // Sort by time
+                trades.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
                 
-                // เรียงลำดับตามเวลา
-                trades.sort((a, b) => {
-                    const timeA = a.closeTime || '';
-                    const timeB = b.closeTime || '';
-                    return timeA.localeCompare(timeB);
-                });
-                
-                // คำนวณลำดับใหม่หลังเรียง
-                trades.forEach((trade, index) => {
-                    const dayMatch = trade.closeTime ? trade.closeTime.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/) : null;
-                    let dayStr = '00';
-                    if (dayMatch) {
-                        dayStr = dayMatch[1].padStart(2, '0');
-                    }
-                    trade.orderNo = dayStr + '-' + (index + 1).toString().padStart(4, '0');
-                });
-                
-                // แสดงทั้ง open และ closed
-                const allTrades = trades;
-                const closedTrades = trades.filter(t => t.profit !== 0);
-                const winning = closedTrades.filter(t => t.profit > 0);
-                
-                // รวม open + closed
-                const totalProfit = trades.reduce((sum, t) => sum + (t.profit || 0), 0);
+                // Calculate stats
                 const totalTrades = trades.length;
-                const totalTrades = closedTrades.length;
-                const totalProfit = closedTrades.reduce((sum, t) => sum + t.profit, 0);
-                const winRate = totalTrades > 0 ? (winning.length / totalTrades * 100).toFixed(1) : 0;
-                const avgProfit = totalTrades > 0 ? totalProfit / totalTrades : 0;
+                const totalProfit = trades.reduce((sum, t) => sum + (t.profit || 0), 0);
+                const wins = trades.filter(t => t.profit > 0).length;
+                const winRate = totalTrades > 0 ? (wins / totalTrades * 100).toFixed(1) : 0;
                 
+                // Update UI
                 document.getElementById('totalTrades').textContent = totalTrades;
-                document.getElementById('totalProfit').textContent = '฿' + totalProfit.toFixed(2);
-                document.getElementById('totalProfit').className = 'metric-value ' + (totalProfit >= 0 ? 'profit' : 'loss');
+                const profitEl = document.getElementById('totalProfit');
+                profitEl.textContent = '฿' + totalProfit.toFixed(2);
+                profitEl.className = 'metric-value ' + (totalProfit >= 0 ? 'profit' : 'loss');
                 document.getElementById('winRate').textContent = winRate + '%';
-                document.getElementById('avgProfit').textContent = '฿' + avgProfit.toFixed(2);
+                document.getElementById('lastUpdate').textContent = 'Updated: ' + new Date().toLocaleTimeString();
                 
-                const tableBody = document.getElementById('tradeTable');
-                tableBody.innerHTML = trades.map(trade => `
+                // Render table
+                document.getElementById('tradeTable').innerHTML = trades.map(t => `
                     <tr>
-                        <td>${trade.orderNo}</td>
-                        <td>${trade.symbol}</td>
-                        <td class="${trade.type === 'BUY' ? 'buy' : 'sell'}">${trade.type}</td>
-                        <td class="${trade.action.includes('BUY') ? 'buy' : 'sell'}">${trade.action}</td>
-                        <td>${trade.volume.toFixed(2)}</td>
-                        <td>${trade.openPrice.toFixed(5)}</td>
-                        <td>${trade.closePrice ? trade.closePrice.toFixed(5) : '-'}</td>
-                        <td class="${trade.profit >= 0 ? 'profit' : 'loss'}">฿${trade.profit.toFixed(2)}</td>
-                        <td>${trade.openTime}</td>
-                        <td>${trade.closeTime || '-'}</td>
+                        <td>${t.time}</td>
+                        <td>${t.symbol}</td>
+                        <td class="${t.type === 'BUY' ? 'buy' : 'sell'}">${t.type}</td>
+                        <td>${t.volume.toFixed(2)}</td>
+                        <td>${t.price}</td>
+                        <td class="${t.profit >= 0 ? 'profit' : 'loss'}">฿${t.profit.toFixed(2)}</td>
                     </tr>
                 `).join('');
                 
-                const now = new Date();
-                document.getElementById('lastUpdate').textContent = 'อัพเดทล่าสุด: ' + now.toLocaleTimeString('th-TH');
-                document.getElementById('error').style.display = 'none';
-                
-            } catch (error) {
-                console.error('Error:', error);
-                showError('ไม่สามารถดึงข้อมูลได้: ' + error.message + '<br>กรุณาตั้งค่า Firestore Rules เป็น Public');
+            } catch(e) {
+                console.error(e);
+                document.getElementById('tradeTable').innerHTML = '<tr><td colspan="6">Error: ' + e.message + '</td></tr>';
             }
         }
         
-        function showEmptyData() {
-            document.getElementById('totalTrades').textContent = '0';
-            document.getElementById('totalProfit').textContent = '�0.00';
-            document.getElementById('winRate').textContent = '0%';
-            document.getElementById('avgProfit').textContent = '�0.00';
-            document.getElementById('tradeTable').innerHTML = '<tr><td colspan="8" class="loading">ไม่มีข้อมูลการเทรด</td></tr>';
-        }
-        
-        function showError(message) {
-            document.getElementById('error').innerHTML = message;
-            document.getElementById('error').style.display = 'block';
-        }
-        
-        window.onload = loadData;
+        // Load every 5 seconds
+        loadData();
         setInterval(loadData, 5000);
     </script>
 </body>
