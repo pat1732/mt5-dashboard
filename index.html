@@ -281,15 +281,12 @@
                         }
                         const date = new Date(timestamp);
                         const day = String(date.getDate()).padStart(2, '0');
-                        // ใช้ timestamp เป็นลำดับ
-                        const seq = String(timestamp).slice(-4);
-                        return day + '-' + seq;
+                        return day;
                     }
                     
-                    const orderNum = generateOrderNumber(fields.open_time?.stringValue || fields.open_time?.integerValue);
+                    const dayNum = getDayFromTime(fields.open_time?.stringValue || fields.open_time?.integerValue);
                     
                     return {
-                        orderNo: orderNum,
                         symbol: fields.symbol?.stringValue || '-',
                         type: tradeType,
                         action: action,
@@ -300,6 +297,17 @@
                         openTime: formatTime(fields.open_time?.stringValue || fields.open_time?.integerValue),
                         closeTime: formatTime(fields.close_time?.stringValue || fields.close_time?.integerValue)
                     };
+                });
+                
+                // เพิ่มลำดับที่
+                trades.forEach((trade, index) => {
+                    // ดึงวันจาก openTime
+                    const dayMatch = trade.openTime.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+                    let dayStr = '00';
+                    if (dayMatch) {
+                        dayStr = dayMatch[1].padStart(2, '0');
+                    }
+                    trade.orderNo = dayStr + '-' + (index + 1).toString().padStart(4, '0');
                 });
                 
                 const closedTrades = trades.filter(t => t.profit !== 0);
