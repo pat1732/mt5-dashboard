@@ -108,6 +108,8 @@
                 const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/trades`;
                 const data = await fetchWithCORS(url);
                 
+                console.log('Data received:', data);
+                
                 if (!data || !data.documents || data.documents.length === 0) {
                     document.getElementById('tradeTable').innerHTML = '<tr><td colspan="10" class="empty">ไม่มีข้อมูลการเทรด</td></tr>';
                     return;
