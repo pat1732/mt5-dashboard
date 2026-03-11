@@ -48,7 +48,6 @@
             <thead>
                 <tr>
                     <th>Time</th>
-                    <th>Symbol</th>
                     <th>Type</th>
                     <th>Volume</th>
                     <th>Price</th>
@@ -56,7 +55,7 @@
                 </tr>
             </thead>
             <tbody id="tradeTable">
-                <tr><td colspan="6" class="loading">Loading...</td></tr>
+                <tr><td colspan="5" class="loading">Loading...</td></tr>
             </tbody>
         </table>
         <div class="last-update" id="lastUpdate"></div>
@@ -65,12 +64,27 @@
     <script>
         const PROJECT_ID = "mt5-trading-a1e86";
         
-        // ใช้ allorigins ข้าม CORS
+        function formatTime(ts) {
+            if (!ts || ts === '-') return '-';
+            // Unix timestamp
+            if (typeof ts === 'string' && /^\d+$/.test(ts)) {
+                const date = new Date(parseInt(ts) * 1000);
+                return date.toLocaleString('th-TH', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+            }
+            return ts;
+        }
+        
+        // Use allorigins proxy
         async function fetchWithCORS(url) {
-            const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(url);
-            const response = await fetch(proxyUrl);
-            const data = await response.json();
-            return JSON.parse(data.contents);
+            try {
+                const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(url);
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                return JSON.parse(data.contents);
+            } catch(e) {
+                console.error('Proxy error:', e);
+                return null;
+            }
         }
         
         async function loadData() {
@@ -78,8 +92,8 @@
                 const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/trades`;
                 const data = await fetchWithCORS(url);
                 
-                if (!data.documents || data.documents.length === 0) {
-                    document.getElementById('tradeTable').innerHTML = '<tr><td colspan="6">No data</td></tr>';
+                if (!data || !data.documents || data.documents.length === 0) {
+                    document.getElementById('tradeTable').innerHTML = '<tr><td colspan="5">No data</td></tr>';
                     return;
                 }
                 
@@ -87,17 +101,16 @@
                 const trades = data.documents.map(doc => {
                     const f = doc.fields || {};
                     return {
-                        symbol: f.symbol?.stringValue || '-',
                         type: f.type?.stringValue || '-',
                         volume: f.volume?.doubleValue || 0,
-                        price: f.open_price?.integerValue || f.close_price?.doubleValue || 0,
+                        price: f.close_price?.doubleValue || f.open_price?.integerValue || 0,
                         profit: f.profit?.doubleValue || 0,
-                        time: f.open_time?.stringValue || '-'
+                        time: f.close_time?.stringValue || f.open_time?.stringValue || '-'
                     };
-                });
+                }).filter(t => t.time !== '-' && t.time); // Only closed trades
                 
-                // Sort by time
-                trades.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+                // Sort by time (newest first)
+                trades.sort((a, b) => parseInt(b.time) - parseInt(a.time));
                 
                 // Calculate stats
                 const totalTrades = trades.length;
@@ -116,22 +129,20 @@
                 // Render table
                 document.getElementById('tradeTable').innerHTML = trades.map(t => `
                     <tr>
-                        <td>${t.time}</td>
-                        <td>${t.symbol}</td>
+                        <td>${formatTime(t.time)}</td>
                         <td class="${t.type === 'BUY' ? 'buy' : 'sell'}">${t.type}</td>
                         <td>${t.volume.toFixed(2)}</td>
-                        <td>${t.price}</td>
+                        <td>${t.price.toFixed(2)}</td>
                         <td class="${t.profit >= 0 ? 'profit' : 'loss'}">฿${t.profit.toFixed(2)}</td>
                     </tr>
                 `).join('');
                 
             } catch(e) {
                 console.error(e);
-                document.getElementById('tradeTable').innerHTML = '<tr><td colspan="6">Error: ' + e.message + '</td></tr>';
+                document.getElementById('tradeTable').innerHTML = '<tr><td colspan="5">Error loading data</td></tr>';
             }
         }
         
-        // Load every 5 seconds
         loadData();
         setInterval(loadData, 5000);
     </script>
