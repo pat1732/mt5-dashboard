@@ -284,8 +284,6 @@
                         return day;
                     }
                     
-                    const dayNum = getDayFromTime(fields.open_time?.stringValue || fields.open_time?.integerValue);
-                    
                     return {
                         symbol: fields.symbol?.stringValue || '-',
                         type: tradeType,
