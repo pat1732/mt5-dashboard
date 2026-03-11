@@ -197,6 +197,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th>Order No</th>
                         <th>Symbol</th>
                         <th>Type</th>
                         <th>Action</th>
@@ -267,7 +268,28 @@
                         return '-';
                     }
                     
+                    // สร้างหมายเลขออร์เดอร์แบบ วันที่-ลำดับ
+                    function generateOrderNumber(timeValue) {
+                        if (!timeValue) return '-';
+                        let timestamp;
+                        if (typeof timeValue === 'string' && !isNaN(timeValue)) {
+                            timestamp = parseInt(timeValue) * 1000;
+                        } else if (typeof timeValue === 'number') {
+                            timestamp = timeValue * 1000;
+                        } else {
+                            return '-';
+                        }
+                        const date = new Date(timestamp);
+                        const day = String(date.getDate()).padStart(2, '0');
+                        // ใช้ timestamp เป็นลำดับ
+                        const seq = String(timestamp).slice(-4);
+                        return day + '-' + seq;
+                    }
+                    
+                    const orderNum = generateOrderNumber(fields.open_time?.stringValue || fields.open_time?.integerValue);
+                    
                     return {
+                        orderNo: orderNum,
                         symbol: fields.symbol?.stringValue || '-',
                         type: tradeType,
                         action: action,
@@ -296,6 +318,7 @@
                 const tableBody = document.getElementById('tradeTable');
                 tableBody.innerHTML = trades.map(trade => `
                     <tr>
+                        <td>${trade.orderNo}</td>
                         <td>${trade.symbol}</td>
                         <td class="${trade.type === 'BUY' ? 'buy' : 'sell'}">${trade.type}</td>
                         <td class="${trade.action.includes('BUY') ? 'buy' : 'sell'}">${trade.action}</td>
