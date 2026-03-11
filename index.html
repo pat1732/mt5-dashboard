@@ -199,6 +199,7 @@
                     <tr>
                         <th>Symbol</th>
                         <th>Type</th>
+                        <th>Action</th>
                         <th>Volume</th>
                         <th>Open Price</th>
                         <th>Close Price</th>
@@ -208,7 +209,7 @@
                     </tr>
                 </thead>
                 <tbody id="tradeTable">
-                    <tr><td colspan="8" class="loading">กำลังโหลดข้อมูล...</td></tr>
+                    <tr><td colspan="9" class="loading">กำลังโหลดข้อมูล...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -236,13 +237,24 @@
                 
                 const trades = data.documents.map(doc => {
                     const fields = doc.fields;
+                    const tradeType = fields.type?.stringValue || '-';
+                    const profit = fields.profit?.doubleValue || 0;
+                    
+                    // คำนวณ action ที่ถูกต้อง
+                    let action = tradeType;
+                    if (tradeType === 'BUY' && profit < 0) action = 'SELL (Close)';
+                    else if (tradeType === 'BUY' && profit > 0) action = 'BUY (Close)';
+                    else if (tradeType === 'SELL' && profit < 0) action = 'BUY (Close)';
+                    else if (tradeType === 'SELL' && profit > 0) action = 'SELL (Close)';
+                    
                     return {
                         symbol: fields.symbol?.stringValue || '-',
-                        type: fields.type?.stringValue || '-',
+                        type: tradeType,
+                        action: action,
                         volume: fields.volume?.doubleValue || 0,
                         openPrice: fields.open_price?.doubleValue || 0,
                         closePrice: fields.close_price?.doubleValue || 0,
-                        profit: fields.profit?.doubleValue || 0,
+                        profit: profit,
                         openTime: fields.open_time?.stringValue || '-',
                         closeTime: fields.close_time?.stringValue || '-'
                     };
@@ -266,6 +278,7 @@
                     <tr>
                         <td>${trade.symbol}</td>
                         <td class="${trade.type === 'BUY' ? 'buy' : 'sell'}">${trade.type}</td>
+                        <td class="${trade.action.includes('BUY') ? 'buy' : 'sell'}">${trade.action}</td>
                         <td>${trade.volume.toFixed(2)}</td>
                         <td>${trade.openPrice.toFixed(5)}</td>
                         <td>${trade.closePrice ? trade.closePrice.toFixed(5) : '-'}</td>
