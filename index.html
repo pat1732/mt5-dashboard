@@ -247,6 +247,19 @@
                     else if (tradeType === 'SELL' && profit < 0) action = 'BUY (Close)';
                     else if (tradeType === 'SELL' && profit > 0) action = 'SELL (Close)';
                     
+                    // แปลง timestamp เป็นวันที่
+                    function formatTime(timeValue) {
+                        if (!timeValue) return '-';
+                        // ถ้าเป็น string (เช่น "2026-03-11 13:00:00")
+                        if (typeof timeValue === 'string') return timeValue;
+                        // ถ้าเป็นตัวเลข (Unix timestamp)
+                        if (typeof timeValue === 'number') {
+                            const date = new Date(timeValue * 1000);
+                            return date.toLocaleString('th-TH');
+                        }
+                        return '-';
+                    }
+                    
                     return {
                         symbol: fields.symbol?.stringValue || '-',
                         type: tradeType,
@@ -255,8 +268,8 @@
                         openPrice: fields.open_price?.doubleValue || 0,
                         closePrice: fields.close_price?.doubleValue || 0,
                         profit: profit,
-                        openTime: fields.open_time?.stringValue || '-',
-                        closeTime: fields.close_time?.stringValue || '-'
+                        openTime: formatTime(fields.open_time?.stringValue || fields.open_time?.integerValue),
+                        closeTime: formatTime(fields.close_time?.stringValue || fields.close_time?.integerValue)
                     };
                 });
                 
