@@ -79,10 +79,26 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
     <script>
-        const PROJECT_ID = "mt5-trading-a1e86";
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0D2sWf2Wf7U",
+            authDomain: "mt5-trading-a1e86.firebaseapp.com",
+            projectId: "mt5-trading-a1e86",
+            storageBucket: "mt5-trading-a1e86.appspot.com",
+            messagingSenderId: "000000000000",
+            appId: "1:000000000000:web:0000000000000000000000"
+        };
         
-        // แก้ไข: รองรับทั้ง string และ number (Unix timestamp)
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // รองรับทั้ง string และ number (Unix timestamp)
         function formatTime(ts) {
             if (!ts || ts === '-') return '-';
             // แปลงเป็น number ถ้าเป็น string
@@ -94,36 +110,26 @@
             return ts;
         }
         
-        // ใช้ allorigins raw (ฟรีไม่ต้อง API key)
-        async function fetchWithCORS(url) {
-            try {
-                const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
-                const response = await fetch(proxyUrl);
-                return await response.json();
-            } catch(e) {
-                console.error('Proxy error:', e);
-                return null;
-            }
-        }
-        
         async function loadData() {
             try {
-                const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/trades`;
-                const data = await fetchWithCORS(url);
+                // ดึงข้อมูลจาก Firestore โดยตรง
+                const snapshot = await db.collection('trades').get();
                 
-                console.log('Data received:', data);
+                console.log('Data received:', snapshot.size, 'documents');
                 
-                if (!data || !data.documents || data.documents.length === 0) {
+                if (snapshot.empty) {
                     document.getElementById('tradeTable').innerHTML = '<tr><td colspan="10" class="empty">ไม่มีข้อมูลการเทรด</td></tr>';
                     return;
                 }
                 
                 // Process all trades (open + closed)
-                const trades = data.documents.map((doc, idx) => {
-                    const f = doc.fields || {};
-                    const tradeType = f.type?.stringValue || '-';
-                    const profit = f.profit?.doubleValue || 0;
-                    const status = f.status?.stringValue || 'closed';
+                const trades = [];
+                snapshot.forEach((doc) => {
+                    const f = doc.data();
+                   .data();
+                    const tradeType = f.type || '-';
+                    const profit = f.profit || 0;
+                    const status = f.status || 'closed';
                     
                     // Calculate action
                     let action = tradeType;
@@ -132,23 +138,22 @@
                     else if (tradeType === 'SELL' && profit < 0) action = 'BUY (Close)';
                     else if (tradeType === 'SELL' && profit > 0) action = 'SELL (Close)';
                     
-                    // แก้ไข: รองรับ integerValue สำหรับ open_time และ close_time
-                    return {
+                    trades.push({
                         orderNo: (idx + 1).toString().padStart(4, '0'),
-                        symbol: f.symbol?.stringValue || '-',
+                        symbol: f.symbol || '-',
                         type: tradeType,
                         action: action,
-                        volume: f.volume?.doubleValue || 0,
-                        openPrice: f.open_price?.integerValue || f.open_price?.doubleValue || 0,
-                        closePrice: f.close_price?.doubleValue || 0,
+                        volume: f.volume || 0,
+                        openPrice: f.open_price || 0,
+                        closePrice: f.close_price || 0,
                         profit: profit,
-                        openTime: f.open_time?.integerValue || f.open_time?.stringValue || '-',
-                        closeTime: f.close_time?.integerValue || f.close_time?.stringValue || '-',
+                        openTime: f.open_time || '-',
+                        closeTime: f.close_time || '-',
                         status: status
-                    };
+                    });
                 });
                 
-                // แก้ไข: sort โดยใช้ number แทน string
+                // sort โดยใช้ number แทน string
                 trades.sort((a, b) => {
                     const timeA = parseInt(a.closeTime) || parseInt(a.openTime) || 0;
                     const timeB = parseInt(b.closeTime) || parseInt(b.openTime) || 0;
@@ -192,8 +197,8 @@
                 `).join('');
                 
             } catch(e) {
-                console.error(e);
-                document.getElementById('tradeTable').innerHTML = '<tr><td colspan="10" class="empty">Error loading data</td></tr>';
+                console.error('Error loading data:', e);
+                document.getElementById('tradeTable').innerHTML = '<tr><td colspan="10" class="empty">Error: ' + e.message + '</td></tr>';
             }
         }
         
