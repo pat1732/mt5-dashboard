@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MT5 Trade Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .last-update {
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            color: #888;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        
+        .profit { color: #00ff88; }
+        .loss { color: #ff4757; }
+        .neutral { color: #ffd93d; }
+        
+        .chart-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .chart-section h2 {
+            margin-bottom: 20px;
+            color: #00d4ff;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        th {
+            background: rgba(255, 255, 255, 0.05);
+            color: #00d4ff;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+        
+        tr:hover { background: rgba(255, 255, 255, 0.05); }
+        .buy { color: #00ff88; }
+        .sell { color: #ff4757; }
+        
+        .refresh-btn {
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: #1a1a2e;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.3s;
+        }
+        
+        .refresh-btn:hover { transform: scale(1.05); }
+        
+        .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff88;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading { text-align: center; padding: 50px; color: #888; }
+        
+        .error {
+            background: rgba(255, 71, 87, 0.2);
+            border: 1px solid #ff4757;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: #ff4757;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📈 MT5 Trade Dashboard</h1>
+            <div class="last-update">
+                <span class="status-dot"></span>
+                <span id="lastUpdate">กำลังโหลดข้อมูล...</span>
+            </div>
+            <br>
+            <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+        </header>
+        
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div class="metrics">
+            <div class="metric-card">
+                <div class="metric-value" id="totalTrades">0</div>
+                <div class="metric-label">Total Trades</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="totalProfit">$0.00</div>
+                <div class="metric-label">Total Profit</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="winRate">0%</div>
+                <div class="metric-label">Win Rate</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="avgProfit">$0.00</div>
+                <div class="metric-label">Avg Profit/Trade</div>
+            </div>
+        </div>
+        
+        <div class="chart-section">
+            <h2>📊 Trade History</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Type</th>
+                        <th>Volume</th>
+                        <th>Open Price</th>
+                        <th>Close Price</th>
+                        <th>Profit</th>
+                        <th>Open Time</th>
+                        <th>Close Time</th>
+                    </tr>
+                </thead>
+                <tbody id="tradeTable">
+                    <tr><td colspan="8" class="loading">กำลังโหลดข้อมูล...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        const PROJECT_ID = "mt5-trading-a1e86";
+        
+        async function loadData() {
+            try {
+                const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/trades`;
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error('ไม่สามารถดึงข้อมูลได้ กรุณาตั้งค่า Firestore เป็น Public');
+                }
+                
+                const data = await response.json();
+                
+                if (!data.documents || data.documents.length === 0) {
+                    showEmptyData();
+                    return;
+                }
+                
+                const trades = data.documents.map(doc => {
+                    const fields = doc.fields;
+                    return {
+                        symbol: fields.symbol?.stringValue || '-',
+                        type: fields.type?.stringValue || '-',
+                        volume: fields.volume?.doubleValue || 0,
+                        openPrice: fields.open_price?.doubleValue || 0,
+                        closePrice: fields.close_price?.doubleValue || 0,
+                        profit: fields.profit?.doubleValue || 0,
+                        openTime: fields.open_time?.stringValue || '-',
+                        closeTime: fields.close_time?.stringValue || '-'
+                    };
+                });
+                
+                const closedTrades = trades.filter(t => t.profit !== 0);
+                const winning = closedTrades.filter(t => t.profit > 0);
+                const totalTrades = closedTrades.length;
+                const totalProfit = closedTrades.reduce((sum, t) => sum + t.profit, 0);
+                const winRate = totalTrades > 0 ? (winning.length / totalTrades * 100).toFixed(1) : 0;
+                const avgProfit = totalTrades > 0 ? totalProfit / totalTrades : 0;
+                
+                document.getElementById('totalTrades').textContent = totalTrades;
+                document.getElementById('totalProfit').textContent = '$' + totalProfit.toFixed(2);
+                document.getElementById('totalProfit').className = 'metric-value ' + (totalProfit >= 0 ? 'profit' : 'loss');
+                document.getElementById('winRate').textContent = winRate + '%';
+                document.getElementById('avgProfit').textContent = '$' + avgProfit.toFixed(2);
+                
+                const tableBody = document.getElementById('tradeTable');
+                tableBody.innerHTML = trades.map(trade => `
+                    <tr>
+                        <td>${trade.symbol}</td>
+                        <td class="${trade.type === 'BUY' ? 'buy' : 'sell'}">${trade.type}</td>
+                        <td>${trade.volume.toFixed(2)}</td>
+                        <td>${trade.openPrice.toFixed(5)}</td>
+                        <td>${trade.closePrice ? trade.closePrice.toFixed(5) : '-'}</td>
+                        <td class="${trade.profit >= 0 ? 'profit' : 'loss'}">$${trade.profit.toFixed(2)}</td>
+                        <td>${trade.openTime}</td>
+                        <td>${trade.closeTime || '-'}</td>
+                    </tr>
+                `).join('');
+                
+                const now = new Date();
+                document.getElementById('lastUpdate').textContent = 'อัพเดทล่าสุด: ' + now.toLocaleTimeString('th-TH');
+                document.getElementById('error').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showError('ไม่สามารถดึงข้อมูลได้: ' + error.message + '<br>กรุณาตั้งค่า Firestore Rules เป็น Public');
+            }
+        }
+        
+        function showEmptyData() {
+            document.getElementById('totalTrades').textContent = '0';
+            document.getElementById('totalProfit').textContent = '$0.00';
+            document.getElementById('winRate').textContent = '0%';
+            document.getElementById('avgProfit').textContent = '$0.00';
+            document.getElementById('tradeTable').innerHTML = '<tr><td colspan="8" class="loading">ไม่มีข้อมูลการเทรด</td></tr>';
+        }
+        
+        function showError(message) {
+            document.getElementById('error').innerHTML = message;
+            document.getElementById('error').style.display = 'block';
+        }
+        
+        window.onload = loadData;
+        setInterval(loadData, 10000);
+    </script>
+</body>
+</html>
