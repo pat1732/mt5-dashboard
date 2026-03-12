@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Firebase Account Data</title>
+</head>
+<body>
+    <h1>Update Account Info in Firebase</h1>
+    <p>Click the button to update account data:</p>
+    <button id="updateBtn">Update Account Data</button>
+    <pre id="result"></pre>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0D2sWf2Wf7U",
+            authDomain: "mt5-trading-a1e86.firebaseapp.com",
+            projectId: "mt5-trading-a1e86",
+            storageBucket: "mt5-trading-a1e86.appspot.com",
+            messagingSenderId: "000000000000",
+            appId: "1:000000000000:web:0000000000000000000000"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        document.getElementById('updateBtn').addEventListener('click', async () => {
+            const result = document.getElementById('result');
+            result.textContent = 'Updating...';
+            
+            try {
+                // Update account info
+                await db.collection('account').doc('info').set({
+                    balance: 2251,
+                    equity: 102500,
+                    margin: 5000,
+                    free_margin: 97500,
+                    update_time: Date.now()
+                });
+                
+                result.textContent = 'Success! Account data updated.\n\nData:\n- Balance: ฿2,251\n- Equity: ฿102,500\n- Margin: ฿5,000\n- Free Margin: ฿97,500';
+                
+                console.log('Account info updated');
+            } catch(e) {
+                result.textContent = 'Error: ' + e.message;
+                console.error(e);
+            }
+        });
+    </script>
+</body>
+</html>
