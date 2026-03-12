@@ -217,7 +217,8 @@
                     const statusText = document.getElementById('statusText');
                     const uptimeEl = document.getElementById('uptime');
                     
-                    const isRunning = data.status === 'running';
+                    // Use ea_running (boolean) instead of status (string)
+                    const isRunning = data.ea_running === true;
                     statusEl.className = 'ea-status ' + (isRunning ? 'running' : 'stopped');
                     statusText.textContent = isRunning ? '🤖 EA Running' : '⏹️ EA Stopped';
                     uptimeEl.textContent = '⏱️ Uptime: ' + calculateUptime(data.start_time);
@@ -237,14 +238,22 @@
         // Load Account Info
         async function loadAccountInfo() {
             try {
-                const snapshot = await db.collection('account').doc('info').get();
+                // Get data from bot_status collection (not account collection)
+                const snapshot = await db.collection('bot_status').doc('status').get();
                 if (snapshot.exists) {
                     const data = snapshot.data();
-                    document.getElementById('balance').textContent = formatCurrency(data.balance);
-                    document.getElementById('equity').textContent = formatCurrency(data.equity);
-                    document.getElementById('equity').className = 'account-value ' + ((data.equity >= data.balance) ? 'profit' : 'loss');
-                    document.getElementById('margin').textContent = formatCurrency(data.margin);
-                    document.getElementById('freeMargin').textContent = formatCurrency(data.free_margin);
+                    const balance = Number(data.balance) || 0;
+                    const floatingPl = Number(data.floating_pl) || 0;
+                    const equity = balance + floatingPl;
+                    
+                    document.getElementById('balance').textContent = formatCurrency(balance);
+                    document.getElementById('equity').textContent = formatCurrency(equity);
+                    document.getElementById('equity').className = 'account-value ' + (equity >= balance ? 'profit' : 'loss');
+                    
+                    // Margin and Free Margin - calculate from positions or show 0
+                    // For now, show floating_pl as margin indicator
+                    document.getElementById('margin').textContent = formatCurrency(floatingPl < 0 ? Math.abs(floatingPl) : 0);
+                    document.getElementById('freeMargin').textContent = formatCurrency(equity);
                 } else {
                     // Demo data
                     document.getElementById('balance').textContent = '฿100,000.00';
