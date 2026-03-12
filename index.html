@@ -411,8 +411,11 @@
         async function loadBotStatus() {
             try {
                 const snapshot = await db.collection('bot_status').doc('status').get();
+                console.log('Bot status data:', snapshot.exists ? snapshot.data() : 'not found');
                 if (snapshot.exists) {
                     const data = snapshot.data();
+                    console.log('ea_running value:', data.ea_running, 'type:', typeof data.ea_running);
+                    console.log('status value:', data.status, 'type:', typeof data.status);
                     const statusEl = document.getElementById('eaStatus');
                     const statusText = document.getElementById('statusText');
                     const uptimeEl = document.getElementById('uptime');
