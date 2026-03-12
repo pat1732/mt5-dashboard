@@ -124,6 +124,97 @@ def save_to_firebase(trade_info, db):
     except Exception as e:
         logger.error(f"Firebase Error: {e}")
 
+def save_account_info(db, account):
+    """บันทึกข้อมูล Account Info ไป Firebase"""
+    try:
+        doc_ref = db.collection('bot_status').document('status')
+        
+        # Get current start_time if exists
+        existing = doc_ref.get()
+        start_time = None
+        if existing.exists:
+            start_time = existing.to_dict().get('start_time')
+        
+        # Use first login time as start_time (for uptime calculation)
+        if start_time is None:
+            start_time = int(datetime.now().timestamp())
+        
+        # Calculate equity = balance + profit (floating)
+        equity = account.balance + account.profit
+        margin = account.margin
+        free_margin = account.margin_free
+        
+        data = {
+            'balance': account.balance,
+            'equity': equity,
+            'floating_pl': account.profit,
+            'margin': margin,
+            'free_margin': free_margin,
+            'ea_running': True,
+            'start_time': start_time,
+            'login': account.login,
+            'server': account.server,
+            'updated_at': datetime.now().isoformat()
+        }
+        
+        doc_ref.set(data, merge=True)
+        logger.debug(f"💰 Account info saved: Balance=${account.balance}, Equity=${equity}")
+        
+    except Exception as e:
+        logger.error(f"Account info save error: {e}")
+
+def save_positions(db, positions):
+    """บันทึก Open Positions ไป Firebase"""
+    try:
+        # Clear old positions first
+        positions_ref = db.collection('positions')
+        old_positions = positions_ref.get()
+        for doc in old_positions:
+            doc.reference.delete()
+        
+        # Save current positions
+        for pos in positions:
+            doc_ref = positions_ref.document(str(pos.ticket))
+            data = {
+                'ticket': pos.ticket,
+                'symbol': pos.symbol,
+                'type': 'BUY' if pos.type == 0 else 'SELL',
+                'volume': pos.volume,
+                'open_price': pos.price_open,
+                'current_price': pos.price_current,
+                'profit': pos.profit,
+                'open_time': datetime.fromtimestamp(pos.time).strftime('%Y-%m-%d %H:%M:%S'),
+                'open_time_ts': pos.time,
+                'sl': pos.sl,
+                'tp': pos.tp,
+            }
+            doc_ref.set(data, merge=True)
+        
+        logger.debug(f"📋 Positions saved: {len(positions)} open positions")
+        
+    except Exception as e:
+        logger.error(f"Positions save error: {e}")
+
+def save_signals(db, signal_data):
+    """บันทึก Signals ไป Firebase"""
+    try:
+        doc_ref = db.collection('signals').document()
+        
+        data = {
+            'symbol': signal_data.get('symbol', 'XAUUSD'),
+            'action': signal_data.get('action'),
+            'reason': signal_data.get('reason', ''),
+            'price': signal_data.get('price'),
+            'time': int(datetime.now().timestamp()),
+            'created_at': datetime.now().isoformat()
+        }
+        
+        doc_ref.set(data)
+        logger.info(f"📡 Signal saved: {signal_data.get('action')} - {signal_data.get('reason')}")
+        
+    except Exception as e:
+        logger.error(f"Signal save error: {e}")
+
 def process_deals(db):
     """ตรวจสอบ Deals ที่เปิด/ปิด"""
     if not mt5.initialize():
@@ -237,12 +328,51 @@ def main():
     # Main loop
     check_interval = config.get('check_interval', 5)
     
+    # Track last account info update for efficiency
+    last_account_update = 0
+    last_positions_update = 0
+    
     try:
         while True:
+            current_time = time.time()
+            
+            # Process deals (trades)
             process_deals(db)
+            
+            # Update account info every 10 seconds
+            if current_time - last_account_update >= 10:
+                account = mt5.account_info()
+                if account:
+                    save_account_info(db, account)
+                last_account_update = current_time
+            
+            # Update positions every 5 seconds
+            if current_time - last_positions_update >= 5:
+                positions = mt5.positions_get()
+                if positions:
+                    save_positions(db, positions)
+                else:
+                    # Clear positions if none
+                    try:
+                        positions_ref = db.collection('positions')
+                        old_positions = positions_ref.get()
+                        for doc in old_positions:
+                            doc.reference.delete()
+                    except:
+                        pass
+                last_positions_update = current_time
+            
             time.sleep(check_interval)
     except KeyboardInterrupt:
         logger.info("🛑 Stopping MT5 Trade Logger...")
+        
+        # Set EA as stopped before exit
+        try:
+            doc_ref = db.collection('bot_status').document('status')
+            doc_ref.set({'ea_running': False, 'updated_at': datetime.now().isoformat()}, merge=True)
+            logger.info("✅ EA marked as stopped in Firebase")
+        except:
+            pass
     finally:
         mt5.shutdown()
 
