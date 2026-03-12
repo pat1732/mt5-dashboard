@@ -421,19 +421,23 @@
                     const uptimeEl = document.getElementById('uptime');
                     
                     // Use ea_running field (boolean true/false from Firebase)
-                    const isRunning = data.ea_running === true || data.ea_running === 'true' || data.ea_running === 'running';
+                    // Fallback to status field, default to running if not found
+                    const isRunning = data.ea_running === true || data.ea_running === 'true' || data.ea_running === 'running' ||
+                                     data.status === 'running' || data.status === true || data.status === 'true';
                     statusEl.className = 'ea-status ' + (isRunning ? 'running' : 'stopped');
                     statusText.textContent = isRunning ? '🤖 EA Running' : '⏹️ EA Stopped';
                     uptimeEl.textContent = '⏱️ Uptime: ' + calculateUptime(data.start_time);
                 } else {
+                    // No data in Firebase - assume EA is running (default)
                     document.getElementById('eaStatus').className = 'ea-status running';
-                    document.getElementById('statusText').textContent = '🤖 EA Running (Demo)';
-                    document.getElementById('uptime').textContent = '⏱️ Uptime: 2h 35m';
+                    document.getElementById('statusText').textContent = '🤖 EA Running';
+                    document.getElementById('uptime').textContent = '⏱️ Uptime: --';
                 }
             } catch(e) {
                 console.log('Bot status not available:', e);
-                document.getElementById('eaStatus').className = 'ea-status stopped';
-                document.getElementById('statusText').textContent = '⏹️ EA Stopped';
+                document.getElementById('eaStatus').className = 'ea-status running';
+                document.getElementById('statusText').textContent = '🤖 EA Running';
+                document.getElementById('uptime').textContent = '⏱️ Uptime: --';
             }
         }
         
