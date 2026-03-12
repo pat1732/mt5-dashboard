@@ -9,19 +9,44 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; color: #fff; padding: 20px; }
         .container { max-width: 1400px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 30px; }
+        
+        header { text-align: center; margin-bottom: 20px; }
         h1 { font-size: 2.5rem; background: linear-gradient(90deg, #00d4ff, #00ff88); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .last-update { color: #888; font-size: 0.9rem; margin-top: 10px; }
+        
+        /* Tab Navigation */
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        .tab-btn { 
+            padding: 12px 30px; 
+            border: none; 
+            border-radius: 25px; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.1);
+            color: #888;
+        }
+        .tab-btn:hover { background: rgba(0,212,255,0.2); color: #00d4ff; }
+        .tab-btn.active { background: #00d4ff; color: #1a1a2e; }
+        
+        /* Tab Content */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Metrics */
         .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .metric-card { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px; text-align: center; }
         .metric-value { font-size: 2rem; font-weight: bold; }
         .metric-label { color: #888; font-size: 0.9rem; margin-top: 5px; }
         .profit { color: #00ff88; }
         .loss { color: #ff4757; }
+        
+        /* Sections */
         .chart-section { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
         .chart-section h2 { font-size: 1.5rem; margin-bottom: 20px; color: #00d4ff; }
         
-        /* Responsive Table Wrapper */
+        /* Table */
         .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); white-space: nowrap; }
@@ -32,11 +57,52 @@
         .loading { text-align: center; color: #888; padding: 30px; }
         .empty { text-align: center; color: #666; padding: 30px; }
         
+        /* Bot Status Styles */
+        .status-banner { text-align: center; margin-bottom: 30px; }
+        .ea-status { display: inline-flex; align-items: center; gap: 12px; padding: 15px 30px; border-radius: 50px; font-size: 1.3rem; font-weight: bold; }
+        .ea-status.running { background: rgba(0,255,136,0.2); border: 2px solid #00ff88; }
+        .ea-status.stopped { background: rgba(255,71,87,0.2); border: 2px solid #ff4757; }
+        .status-dot { width: 16px; height: 16px; border-radius: 50%; animation: pulse 1.5s infinite; }
+        .running .status-dot { background: #00ff88; }
+        .stopped .status-dot { background: #ff4757; animation: none; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        .uptime-badge { background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 20px; margin-top: 10px; display: inline-block; }
+        
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        
+        .card { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px; }
+        .card h2 { font-size: 1.2rem; margin-bottom: 15px; color: #00d4ff; display: flex; align-items: center; gap: 8px; }
+        
+        .account-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .account-item { text-align: center; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px; }
+        .account-label { color: #888; font-size: 0.85rem; margin-bottom: 5px; }
+        .account-value { font-size: 1.5rem; font-weight: bold; }
+        
+        .positions-table { width: 100%; border-collapse: collapse; }
+        .positions-table th, .positions-table td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; }
+        .positions-table th { background: rgba(0,212,255,0.2); color: #00d4ff; font-weight: 600; }
+        
+        .signal-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 8px; }
+        .signal-time { color: #888; font-size: 0.8rem; }
+        .signal-symbol { font-weight: bold; font-size: 1.1rem; }
+        .signal-action { padding: 4px 12px; border-radius: 15px; font-weight: bold; font-size: 0.9rem; }
+        .signal-action.buy { background: rgba(0,255,136,0.2); color: #00ff88; }
+        .signal-action.sell { background: rgba(255,71,87,0.2); color: #ff4757; }
+        
+        .last-trade { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px; flex-wrap: wrap; gap: 15px; }
+        .last-trade-info { display: flex; gap: 20px; flex-wrap: wrap; }
+        .last-trade-item { text-align: center; }
+        .last-trade-label { color: #888; font-size: 0.75rem; }
+        .last-trade-value { font-weight: bold; }
+        
         /* Mobile Styles */
         @media (max-width: 768px) {
             body { padding: 10px; }
             h1 { font-size: 1.5rem; }
             .last-update { font-size: 0.75rem; }
+            .tabs { gap: 5px; }
+            .tab-btn { padding: 10px 20px; font-size: 0.9rem; }
             .metrics { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
             .metric-card { padding: 12px; }
             .metric-value { font-size: 1.25rem; }
@@ -44,16 +110,12 @@
             .chart-section { padding: 12px; }
             .chart-section h2 { font-size: 1.1rem; margin-bottom: 12px; }
             th, td { padding: 8px; font-size: 0.85rem; }
-            
-            /* Hide less important columns on mobile */
             .hide-mobile { display: none; }
-        }
-        
-        /* Tablet Styles */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            h1 { font-size: 2rem; }
-            .metrics { grid-template-columns: repeat(4, 1fr); }
-            th, td { padding: 12px; font-size: 0.9rem; }
+            .ea-status { font-size: 1rem; padding: 10px 20px; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .account-info { grid-template-columns: 1fr; }
+            .last-trade { flex-direction: column; align-items: flex-start; }
+            .last-trade-info { width: 100%; justify-content: space-between; }
         }
     </style>
 </head>
@@ -64,47 +126,117 @@
             <div class="last-update" id="lastUpdate">Last Update: --:--:--</div>
         </header>
         
-        <div class="metrics">
-            <div class="metric-card">
-                <div class="metric-value" id="totalTrades">0</div>
-                <div class="metric-label">Total Trades</div>
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('trade-history')">📈 Trade History</button>
+            <button class="tab-btn" onclick="switchTab('bot-status')">🤖 Bot Status</button>
+        </div>
+        
+        <!-- Trade History Tab -->
+        <div id="trade-history" class="tab-content active">
+            <div class="metrics">
+                <div class="metric-card">
+                    <div class="metric-value" id="totalTrades">0</div>
+                    <div class="metric-label">Total Trades</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="totalProfit">฿0</div>
+                    <div class="metric-label">Total Profit</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="winRate">0%</div>
+                    <div class="metric-label">Win Rate</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="avgProfit">฿0</div>
+                    <div class="metric-label">Avg Profit/Trade</div>
+                </div>
             </div>
-            <div class="metric-card">
-                <div class="metric-value" id="totalProfit">฿0</div>
-                <div class="metric-label">Total Profit</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value" id="winRate">0%</div>
-                <div class="metric-label">Win Rate</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value" id="avgProfit">฿0</div>
-                <div class="metric-label">Avg Profit/Trade</div>
+
+            <div class="chart-section">
+                <h2>📈 Trade History</h2>
+                <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Symbol</th>
+                            <th>Type</th>
+                            <th>Action</th>
+                            <th>Volume</th>
+                            <th>Open Price</th>
+                            <th class="hide-mobile">Close Price</th>
+                            <th>Profit</th>
+                            <th class="hide-mobile">Open Time</th>
+                            <th class="hide-mobile">Close Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradeTable">
+                        <tr><td colspan="10" class="loading">กำลังโหลดข้อมูล...</td></tr>
+                    </tbody>
+                </table>
+                </div>
             </div>
         </div>
-
-        <div class="chart-section">
-            <h2>📈 Trade History</h2>
-            <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Symbol</th>
-                        <th>Type</th>
-                        <th>Action</th>
-                        <th>Volume</th>
-                        <th>Open Price</th>
-                        <th class="hide-mobile">Close Price</th>
-                        <th>Profit</th>
-                        <th class="hide-mobile">Open Time</th>
-                        <th class="hide-mobile">Close Time</th>
-                    </tr>
-                </thead>
-                <tbody id="tradeTable">
-                    <tr><td colspan="10" class="loading">กำลังโหลดข้อมูล...</td></tr>
-                </tbody>
-            </table>
+        
+        <!-- Bot Status Tab -->
+        <div id="bot-status" class="tab-content">
+            <!-- EA Status Banner -->
+            <div class="status-banner">
+                <div class="ea-status" id="eaStatus">
+                    <span class="status-dot"></span>
+                    <span id="statusText">กำลังโหลด...</span>
+                </div>
+                <div class="uptime-badge" id="uptime">⏱️ Uptime: --</div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <!-- Account Info -->
+                <div class="card">
+                    <h2>💰 Account Info</h2>
+                    <div class="account-info">
+                        <div class="account-item">
+                            <div class="account-label">Balance</div>
+                            <div class="account-value" id="balance">--</div>
+                        </div>
+                        <div class="account-item">
+                            <div class="account-label">Equity</div>
+                            <div class="account-value" id="equity">--</div>
+                        </div>
+                        <div class="account-item">
+                            <div class="account-label">Margin</div>
+                            <div class="account-value" id="margin">--</div>
+                        </div>
+                        <div class="account-item">
+                            <div class="account-label">Free Margin</div>
+                            <div class="account-value" id="freeMargin">--</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Open Positions -->
+                <div class="card">
+                    <h2>📋 Open Positions</h2>
+                    <div id="positionsList">
+                        <div class="loading">กำลังโหลด...</div>
+                    </div>
+                </div>
+                
+                <!-- Recent Signals -->
+                <div class="card">
+                    <h2>📡 Recent Signals</h2>
+                    <div id="signalsList">
+                        <div class="loading">กำลังโหลด...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Last Trade -->
+            <div class="card" style="margin-bottom: 30px;">
+                <h2>🎯 Last Trade</h2>
+                <div id="lastTrade">
+                    <div class="loading">กำลังโหลด...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -128,10 +260,25 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
-        // รองรับทั้ง string และ number (Unix timestamp)
+        // Tab switching
+        function switchTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            // Remove active from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            // Add active to clicked button
+            event.target.classList.add('active');
+        }
+        
+        // Format timestamp
         function formatTime(ts) {
             if (!ts || ts === '-') return '-';
-            // แปลงเป็น number ถ้าเป็น string
             const tsNum = typeof ts === 'string' ? parseInt(ts) : ts;
             if (!isNaN(tsNum)) {
                 const date = new Date(tsNum * 1000);
@@ -140,9 +287,43 @@
             return ts;
         }
         
-        async function loadData() {
+        // Format time only
+        function formatTimeOnly(ts) {
+            if (!ts) return '-';
+            const tsNum = typeof ts === 'string' ? parseInt(ts) : ts;
+            if (!isNaN(tsNum)) {
+                const date = new Date(tsNum * 1000);
+                return date.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+            }
+            return ts;
+        }
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return '฿' + (Number(amount) || 0).toFixed(2);
+        }
+        
+        // Calculate uptime
+        function calculateUptime(startTime) {
+            if (!startTime) return '--';
+            const start = new Date(startTime * 1000);
+            const now = new Date();
+            const diff = Math.floor((now - start) / 1000);
+            
+            const days = Math.floor(diff / 86400);
+            const hours = Math.floor((diff % 86400) / 3600);
+            const minutes = Math.floor((diff % 3600) / 60);
+            const seconds = diff % 60;
+            
+            if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+            if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
+            if (minutes > 0) return `${minutes}m ${seconds}s`;
+            return `${seconds}s`;
+        }
+        
+        // ==================== TRADE HISTORY FUNCTIONS ====================
+        async function loadTradeHistory() {
             try {
-                // ดึงข้อมูลจาก Firestore โดยตรง
                 const snapshot = await db.collection('trades').get();
                 
                 console.log('Data received:', snapshot.size, 'documents');
@@ -152,7 +333,6 @@
                     return;
                 }
                 
-                // Process all trades (open + closed)
                 const trades = [];
                 let idx = 0;
                 snapshot.forEach((doc) => {
@@ -161,7 +341,6 @@
                     const profit = f.profit || 0;
                     const status = f.status || 'closed';
                     
-                    // Calculate action
                     let action = tradeType;
                     if (tradeType === 'BUY' && profit < 0) action = 'SELL (Close)';
                     else if (tradeType === 'BUY' && profit > 0) action = 'BUY (Close)';
@@ -184,17 +363,14 @@
                     idx++;
                 });
                 
-                // sort โดยใช้ number แทน string
                 trades.sort((a, b) => {
                     const timeA = parseInt(a.closeTime) || parseInt(a.openTime) || 0;
                     const timeB = parseInt(b.closeTime) || parseInt(b.openTime) || 0;
                     return timeA - timeB;
                 });
                 
-                // Reassign order numbers after sort (0001, 0002, ...)
                 trades.forEach((t, idx) => t.orderNo = (idx + 1).toString().padStart(4, '0'));
                 
-                // Calculate stats (only closed trades with profit != 0)
                 const closedTrades = trades.filter(t => t.status === 'closed' && t.profit !== 0);
                 const winning = closedTrades.filter(t => t.profit > 0);
                 const totalTrades = closedTrades.length;
@@ -202,7 +378,6 @@
                 const winRate = totalTrades > 0 ? (winning.length / totalTrades * 100).toFixed(1) : 0;
                 const avgProfit = totalTrades > 0 ? totalProfit / totalTrades : 0;
                 
-                // Update stats
                 document.getElementById('totalTrades').textContent = totalTrades;
                 const profitEl = document.getElementById('totalProfit');
                 profitEl.textContent = '฿' + totalProfit.toFixed(2);
@@ -211,7 +386,6 @@
                 document.getElementById('avgProfit').textContent = '฿' + avgProfit.toFixed(2);
                 document.getElementById('lastUpdate').textContent = 'Last Update: ' + new Date().toLocaleTimeString();
                 
-                // Render table
                 document.getElementById('tradeTable').innerHTML = trades.map(t => `
                     <tr>
                         <td>${t.orderNo}</td>
@@ -233,8 +407,186 @@
             }
         }
         
-        loadData();
-        setInterval(loadData, 5000);
+        // ==================== BOT STATUS FUNCTIONS ====================
+        async function loadBotStatus() {
+            try {
+                const snapshot = await db.collection('bot_status').doc('status').get();
+                if (snapshot.exists) {
+                    const data = snapshot.data();
+                    const statusEl = document.getElementById('eaStatus');
+                    const statusText = document.getElementById('statusText');
+                    const uptimeEl = document.getElementById('uptime');
+                    
+                    const isRunning = data.status === 'running';
+                    statusEl.className = 'ea-status ' + (isRunning ? 'running' : 'stopped');
+                    statusText.textContent = isRunning ? '🤖 EA Running' : '⏹️ EA Stopped';
+                    uptimeEl.textContent = '⏱️ Uptime: ' + calculateUptime(data.start_time);
+                } else {
+                    document.getElementById('eaStatus').className = 'ea-status running';
+                    document.getElementById('statusText').textContent = '🤖 EA Running (Demo)';
+                    document.getElementById('uptime').textContent = '⏱️ Uptime: 2h 35m';
+                }
+            } catch(e) {
+                console.log('Bot status not available:', e);
+                document.getElementById('eaStatus').className = 'ea-status stopped';
+                document.getElementById('statusText').textContent = '⏹️ EA Stopped';
+            }
+        }
+        
+        async function loadAccountInfo() {
+            try {
+                const snapshot = await db.collection('account').doc('info').get();
+                if (snapshot.exists) {
+                    const data = snapshot.data();
+                    document.getElementById('balance').textContent = formatCurrency(data.balance);
+                    document.getElementById('equity').textContent = formatCurrency(data.equity);
+                    document.getElementById('equity').className = 'account-value ' + ((data.equity >= data.balance) ? 'profit' : 'loss');
+                    document.getElementById('margin').textContent = formatCurrency(data.margin);
+                    document.getElementById('freeMargin').textContent = formatCurrency(data.free_margin);
+                } else {
+                    document.getElementById('balance').textContent = '฿100,000.00';
+                    document.getElementById('equity').textContent = '฿102,500.00';
+                    document.getElementById('equity').className = 'account-value profit';
+                    document.getElementById('margin').textContent = '฿5,000.00';
+                    document.getElementById('freeMargin').textContent = '฿97,500.00';
+                }
+            } catch(e) {
+                console.log('Account info not available:', e);
+            }
+        }
+        
+        async function loadOpenPositions() {
+            try {
+                const snapshot = await db.collection('positions').get();
+                const container = document.getElementById('positionsList');
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="empty">ไม่มี Position ที่เปิดอยู่</div>';
+                    return;
+                }
+                
+                const positions = [];
+                snapshot.forEach(doc => {
+                    positions.push(doc.data());
+                });
+                
+                positions.sort((a, b) => (b.open_time || 0) - (a.open_time || 0));
+                
+                container.innerHTML = '<table class="positions-table"><thead><tr><th>Symbol</th><th>Type</th><th>Volume</th><th>Open Price</th><th>Profit</th><th>Time</th></tr></thead><tbody>' + 
+                    positions.map(p => `
+                        <tr>
+                            <td><strong>${p.symbol || '-'}</strong></td>
+                            <td class="${p.type === 'BUY' ? 'buy' : 'sell'}">${p.type || '-'}</td>
+                            <td>${(p.volume || 0).toFixed(2)}</td>
+                            <td>${(p.open_price || 0).toFixed(5)}</td>
+                            <td class="${(p.profit || 0) >= 0 ? 'profit' : 'loss'}">${formatCurrency(p.profit)}</td>
+                            <td>${formatTime(p.open_time)}</td>
+                        </tr>
+                    `).join('') + '</tbody></table>';
+                    
+            } catch(e) {
+                console.log('Positions not available:', e);
+                document.getElementById('positionsList').innerHTML = '<div class="empty">ไม่มี Position ที่เปิดอยู่ (Demo)</div>';
+            }
+        }
+        
+        async function loadRecentSignals() {
+            try {
+                const snapshot = await db.collection('signals').orderBy('time', 'desc').limit(5).get();
+                const container = document.getElementById('signalsList');
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="empty">ไม่มี Signal ล่าสุด</div>';
+                    return;
+                }
+                
+                container.innerHTML = snapshot.docs.map(doc => {
+                    const s = doc.data();
+                    return `
+                        <div class="signal-item">
+                            <div>
+                                <div class="signal-symbol">${s.symbol || '-'}</div>
+                                <div class="signal-time">${formatTimeOnly(s.time)}</div>
+                            </div>
+                            <div class="signal-action ${s.action?.toLowerCase() || 'buy'}">${s.action || 'BUY'}</div>
+                        </div>
+                    `;
+                }).join('');
+                    
+            } catch(e) {
+                console.log('Signals not available:', e);
+                document.getElementById('signalsList').innerHTML = '<div class="empty">ไม่มี Signal ล่าสุด (Demo)</div>';
+            }
+        }
+        
+        async function loadLastTrade() {
+            try {
+                const snapshot = await db.collection('trades').orderBy('close_time', 'desc').limit(1).get();
+                const container = document.getElementById('lastTrade');
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="empty">ยังไม่มีการเทรด</div>';
+                    return;
+                }
+                
+                const trade = snapshot.docs[0].data();
+                const profit = Number(trade.profit) || 0;
+                
+                container.innerHTML = `
+                    <div class="last-trade">
+                        <div class="last-trade-info">
+                            <div class="last-trade-item">
+                                <div class="last-trade-label">Symbol</div>
+                                <div class="last-trade-value">${trade.symbol || '-'}</div>
+                            </div>
+                            <div class="last-trade-item">
+                                <div class="last-trade-label">Type</div>
+                                <div class="last-trade-value ${trade.type === 'BUY' ? 'buy' : 'sell'}">${trade.type || '-'}</div>
+                            </div>
+                            <div class="last-trade-item">
+                                <div class="last-trade-label">Volume</div>
+                                <div class="last-trade-value">${(trade.volume || 0).toFixed(2)}</div>
+                            </div>
+                            <div class="last-trade-item">
+                                <div class="last-trade-label">Open Price</div>
+                                <div class="last-trade-value">${(trade.open_price || 0).toFixed(5)}</div>
+                            </div>
+                            <div class="last-trade-item">
+                                <div class="last-trade-label">Close Price</div>
+                                <div class="last-trade-value">${(trade.close_price || 0).toFixed(5)}</div>
+                            </div>
+                            <div class="last-trade-item">
+                                <div class="last-trade-label">Profit</div>
+                                <div class="last-trade-value" style="color: ${profit >= 0 ? '#00ff88' : '#ff4757'}">${formatCurrency(profit)}</div>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="last-trade-label">Closed</div>
+                            <div class="last-trade-value">${formatTime(trade.close_time)}</div>
+                        </div>
+                    </div>
+                `;
+                    
+            } catch(e) {
+                console.log('Last trade not available:', e);
+                document.getElementById('lastTrade').innerHTML = '<div class="empty">ยังไม่มีการเทรด (Demo)</div>';
+            }
+        }
+        
+        // Load all data
+        async function loadAllData() {
+            await Promise.all([
+                loadTradeHistory(),
+                loadBotStatus(),
+                loadAccountInfo(),
+                loadOpenPositions(),
+                loadRecentSignals(),
+                loadLastTrade()
+            ]);
+        }
+        
+        loadAllData();
+        setInterval(loadAllData, 5000);
     </script>
 </body>
 </html>
