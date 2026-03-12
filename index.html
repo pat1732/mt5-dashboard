@@ -20,14 +20,41 @@
         .loss { color: #ff4757; }
         .chart-section { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
         .chart-section h2 { font-size: 1.5rem; margin-bottom: 20px; color: #00d4ff; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        /* Responsive Table Wrapper */
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); white-space: nowrap; }
         th { background: rgba(0,212,255,0.2); color: #00d4ff; font-weight: 600; }
         tr:hover { background: rgba(255,255,255,0.05); }
         .buy { color: #00ff88; font-weight: bold; }
         .sell { color: #ff4757; font-weight: bold; }
         .loading { text-align: center; color: #888; padding: 30px; }
         .empty { text-align: center; color: #666; padding: 30px; }
+        
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            h1 { font-size: 1.5rem; }
+            .last-update { font-size: 0.75rem; }
+            .metrics { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+            .metric-card { padding: 12px; }
+            .metric-value { font-size: 1.25rem; }
+            .metric-label { font-size: 0.7rem; }
+            .chart-section { padding: 12px; }
+            .chart-section h2 { font-size: 1.1rem; margin-bottom: 12px; }
+            th, td { padding: 8px; font-size: 0.85rem; }
+            
+            /* Hide less important columns on mobile */
+            .hide-mobile { display: none; }
+        }
+        
+        /* Tablet Styles */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            h1 { font-size: 2rem; }
+            .metrics { grid-template-columns: repeat(4, 1fr); }
+            th, td { padding: 12px; font-size: 0.9rem; }
+        }
     </style>
 </head>
 <body>
@@ -58,6 +85,7 @@
 
         <div class="chart-section">
             <h2>📈 Trade History</h2>
+            <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
@@ -67,16 +95,17 @@
                         <th>Action</th>
                         <th>Volume</th>
                         <th>Open Price</th>
-                        <th>Close Price</th>
+                        <th class="hide-mobile">Close Price</th>
                         <th>Profit</th>
-                        <th>Open Time</th>
-                        <th>Close Time</th>
+                        <th class="hide-mobile">Open Time</th>
+                        <th class="hide-mobile">Close Time</th>
                     </tr>
                 </thead>
                 <tbody id="tradeTable">
                     <tr><td colspan="10" class="loading">กำลังโหลดข้อมูล...</td></tr>
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 
@@ -191,10 +220,10 @@
                         <td class="${t.action.includes('BUY') ? 'buy' : 'sell'}">${t.action}</td>
                         <td>${t.volume.toFixed(2)}</td>
                         <td>${t.openPrice ? t.openPrice.toFixed(5) : '-'}</td>
-                        <td>${t.closePrice ? t.closePrice.toFixed(5) : '-'}</td>
+                        <td class="hide-mobile">${t.closePrice ? t.closePrice.toFixed(5) : '-'}</td>
                         <td class="${t.profit >= 0 ? 'profit' : 'loss'}">฿${t.profit.toFixed(2)}</td>
-                        <td>${formatTime(t.openTime)}</td>
-                        <td>${formatTime(t.closeTime)}</td>
+                        <td class="hide-mobile">${formatTime(t.openTime)}</td>
+                        <td class="hide-mobile">${formatTime(t.closeTime)}</td>
                     </tr>
                 `).join('');
                 
