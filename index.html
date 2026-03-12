@@ -408,6 +408,7 @@
         }
         
         // ==================== BOT STATUS FUNCTIONS ====================
+        // Load Bot Status from bot_status collection
         async function loadBotStatus() {
             try {
                 const snapshot = await db.collection('bot_status').doc('status').get();
@@ -441,16 +442,24 @@
             }
         }
         
+        // Load Account Info from bot_status collection (since mt5_listener sends there)
         async function loadAccountInfo() {
             try {
-                const snapshot = await db.collection('account').doc('info').get();
+                // Get data from bot_status collection (not account collection)
+                const snapshot = await db.collection('bot_status').doc('status').get();
                 if (snapshot.exists) {
                     const data = snapshot.data();
-                    document.getElementById('balance').textContent = formatCurrency(data.balance);
-                    document.getElementById('equity').textContent = formatCurrency(data.equity);
-                    document.getElementById('equity').className = 'account-value ' + ((data.equity >= data.balance) ? 'profit' : 'loss');
-                    document.getElementById('margin').textContent = formatCurrency(data.margin);
-                    document.getElementById('freeMargin').textContent = formatCurrency(data.free_margin);
+                    const balance = Number(data.balance) || 0;
+                    const floatingPl = Number(data.floating_pl) || 0;
+                    const equity = balance + floatingPl;
+                    const margin = Number(data.margin) || 0;
+                    const freeMargin = equity - margin;
+                    
+                    document.getElementById('balance').textContent = formatCurrency(balance);
+                    document.getElementById('equity').textContent = formatCurrency(equity);
+                    document.getElementById('equity').className = 'account-value ' + (equity >= balance ? 'profit' : 'loss');
+                    document.getElementById('margin').textContent = formatCurrency(margin);
+                    document.getElementById('freeMargin').textContent = formatCurrency(freeMargin);
                 } else {
                     // No data in Firebase - show placeholder instead of old demo values
                     document.getElementById('balance').textContent = 'รอข้อมูล...';
