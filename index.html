@@ -444,11 +444,12 @@
                     document.getElementById('margin').textContent = formatCurrency(data.margin);
                     document.getElementById('freeMargin').textContent = formatCurrency(data.free_margin);
                 } else {
-                    document.getElementById('balance').textContent = '฿100,000.00';
-                    document.getElementById('equity').textContent = '฿102,500.00';
-                    document.getElementById('equity').className = 'account-value profit';
-                    document.getElementById('margin').textContent = '฿5,000.00';
-                    document.getElementById('freeMargin').textContent = '฿97,500.00';
+                    // No data in Firebase - show placeholder instead of old demo values
+                    document.getElementById('balance').textContent = 'รอข้อมูล...';
+                    document.getElementById('equity').textContent = 'รอข้อมูล...';
+                    document.getElementById('equity').className = 'account-value';
+                    document.getElementById('margin').textContent = 'รอข้อมูล...';
+                    document.getElementById('freeMargin').textContent = 'รอข้อมูล...';
                 }
             } catch(e) {
                 console.log('Account info not available:', e);
